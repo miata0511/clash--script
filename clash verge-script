@@ -1,435 +1,775 @@
-// Enhanced Clash Config Script
-// For Clash Verge Rev (Version ≥ 17.2) & Mihomo-Party (Version ≥ 1.5.10)
-// Last Update: 2025-03-19
+#开始编辑配置时，心中牢记缩进和冒号引号，任何不懂，查看官方wiki：https://wiki.metacubex.one
+#修改配置后如果内核不能启动，请查看日志，日志中会告诉你配置第几行写错
+mixed-port: 7890
+mode: rule
+allow-lan: true
+unified-delay: true
+tcp-concurrent: true
+find-process-mode: always
+log-level: info
+ipv6: true
+#关掉后可能在部分手机上出现dns泄露，volte不可用等问题，目前IPv6可以正常使用，不建议关闭
+external-controller: 0.0.0.0:9090
+external-ui: WebUI
+external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
 
-const ruleProviderCommon = {
-  "type": "http",
-  "format": "text",
-  "interval": 86400
-};
+geodata-mode: true
+geox-url:
+  geoip: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip-lite.dat"
+  geosite: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
+  mmdb: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country-lite.mmdb"
+  asn: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb"
+geo-auto-update: true
+geo-update-interval: 24
 
-const groupBaseOption = {
-  "interval": 86400,
-  "url": "https://cp.cloudflare.com/generate_204",
-  "max-failed-times": 3,
-};
+profile:
+  store-selected: true
+  store-fake-ip: true
 
-const standardProxies = ["手动切换", "🇭🇰 香港", "🇺🇸 美国", "🇸🇬 狮城", "🇯🇵 日本", "🇹🇼 台湾", "DIRECT"];
+# 嗅探配置 - 提高连接识别能力
+sniffer:
+  enable: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports: [80, 443, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 853, 8443]
+    QUIC:
+      ports: [443, 853, 8443]
+  skip-domain:
+    - "+.push.apple.com"
+    - "Mijia Cloud"
+    - "+.oray.com"
 
-function main(config) {
-  if (!config || typeof config !== 'object') {
-    throw new Error("Invalid configuration file");
-  }
+# TUN配置 - 确保系统级代理正常工作
+tun:
+  enable: true
+  stack: gvisor  # 如遇问题可尝试改为system
+  device: Meta
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: false
+  dns-hijack: 
+    - any:53
+    - tcp://any:53
+  exclude-package:
+    - com.xiaomi.mirror
+    - com.xiaomi.mi_connect_service
+    - com.samsung.android.messaging
+    - com.samsung.android.app.telephonyui
+    - com.samsung.android.dialer
+    - com.samsung.android.incallui
+    - com.samsung.android.smartcallprovider
+    - com.samsung.android.intellivoiceservice
+    - com.android.settings
+    - com.qti.qcc
+    - com.sec.epdg
+    - com.sec.imsservice
+    - com.onepassword.android
+    - com.autonavi.minimap
+    - com.jingdong.app.mall
+    - com.sankuai.meituan
+    - com.taobao.taobao
+    - com.taobao.idlefish
+    - com.eg.android.AlipayGphone
+    - com.bilibili.app.in
+    - com.coolapk.market
+    - com.github.tornaco.android.thanos.pro
+    - com.example.infoxmed_android
+    - com.maimemo.android.momo
+    - com.baidu.netdisk
+    - com.haocheyou.www
+    - com.hush.yamby
+    - com.yikaobang.yixue
+    - com.mvw.nationalmedicalPhone
+    - cn.dxy.medicinehelper
+    - com.netease.mail
+    - com.tencent.mm
+    - com.tencent.mobileqq
+
+# 高效DNS配置 - 平衡国内外访问速度
+dns:
+  enable: true
+  ipv6: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter: ['*', '+.lan', '+.local', '+.market.xiaomi.com']
+  use-hosts: true
+  default-nameserver:
+    - 223.5.5.5    # 阿里DNS
+    - 119.29.29.29 # 腾讯DNS
+  nameserver:
+    - https://120.53.53.53/dns-query
+    - https://223.5.5.5/dns-query
+  proxy-server-nameserver:
+    - https://120.53.53.53/dns-query
+    - https://223.5.5.5/dns-query
+  nameserver-policy:
+    'geosite:private': 'system'
+    'geosite:cn,steam@cn,category-games@cn,microsoft@cn,apple@cn': [119.29.29.29, 223.5.5.5]
+
+# =======================================================================
+# 代理提供商配置
+# =======================================================================
+proxy-providers:
+  机场1:
+    type: http
+    url: "https://gist.githubusercontent.com/miata0511/9aa5d774143b9ad7b30d3748a8b297e7/raw/11c56aab9cfd18bde0bb49f627562332cddf1341/clash-config.yaml"
+    path: ./proxy_providers/机场1.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场2:
+    type: http
+    url: "https://api-linkcube.org/subscribe/jzpjq-zdp_avdw"
+    path: ./proxy_providers/机场2.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场3:
+    type: http
+    url: "https://links.azurefd.net/api/v1/client/subscribe?token=409b7f296a15f2f437e0e10749867355"
+    path: ./proxy_providers/机场3.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场4:
+    type: http
+    url: "https://sub.homocloud.link/api/subscribe?token=9e8f93ed53cdfa57a7cbfc1fc99ec5b9"
+    path: ./proxy_providers/机场4.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场5:
+    type: http
+    url: "https://2akribis.com/api/v1/client/subscribe?token=cbe3261ce31f5868ce56639965e188ca"
+    path: ./proxy_providers/机场5.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场6:
+    type: http
+    url: "https://45.137.181.206/api/v1/client/subscribe?token=dc1cb253f98236f1d31c411802557bfb"
+    path: ./proxy_providers/机场6.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+# =======================================================================
+# 策略组配置
+# =======================================================================
+proxy-groups:
+  # 模式选择 - 主界面显示的核心选择
+  - name: 模式选择
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 机场1
+      - 机场2
+      - 机场3
+      - 机场4
+      - 机场5
+      - 机场6
+      - 直连
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Global.png
+
+  # 默认节点 - 核心策略组
+  - name: 默认节点
+    type: select
+    proxies:
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 机场1
+      - 机场2
+      - 机场3
+      - 机场4
+      - 机场5
+      - 机场6
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Proxy.png
+      
+  # 地区节点分类 - 按地区汇总所有节点
+  - name: 香港
+    type: select
+    include-all: true
+    filter: '香港|HK|Hong Kong|HongKong|港'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Hong_Kong.png
+
+  - name: 台湾
+    type: select
+    include-all: true
+    filter: '台湾|TW|Taiwan|台灣|臺灣|台'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Taiwan.png
+
+  - name: 新加坡
+    type: select
+    include-all: true
+    filter: '新加坡|狮城|SG|Singapore'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Singapore.png
+    
+  - name: 日本
+    type: select
+    include-all: true
+    filter: '日本|JP|Japan|东京|大阪|日'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Japan.png
+
+  - name: 美国
+    type: select
+    include-all: true
+    filter: '美国|USA|美國|us|US|United States'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/United_States.png
+      
+  # 各个机场节点
+  - name: 机场1
+    type: select
+    use:
+      - 机场1
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Airport.png
+
+  - name: 机场2
+    type: select
+    use:
+      - 机场2
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Airport.png
+
+  - name: 机场3
+    type: select
+    use:
+      - 机场3
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Airport.png
+
+  - name: 机场4
+    type: select
+    use:
+      - 机场4
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Airport.png
+
+  - name: 机场5
+    type: select
+    use:
+      - 机场5
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Airport.png
+
+  - name: 机场6
+    type: select
+    use:
+      - 机场6
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Airport.png
+
+  # 直连模式
+  - name: 直连
+    type: select
+    proxies:
+      - DIRECT
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Direct.png
+
+  # 分流规则 - 应用和服务分类
+  - name: AI
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'https://chat.openai.com/cdn-cgi/trace'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/ChatGPT.png
+      
+  - name: YouTube
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'https://www.youtube.com/s/desktop/494dd881/img/favicon.ico'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/YouTube.png
+      
+  - name: Netflix
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'https://api.fast.com/netflix/speedtest/v2?https=true'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Netflix.png
+      
+  - name: Disney+
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'https://disney.api.edge.bamgrid.com/devices'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Disney+.png
+      
+  - name: Spotify
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'http://spclient.wg.spotify.com/signup/public/v1/account'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Spotify.png
+      
+  - name: 巴哈姆特
+    type: select
+    proxies:
+      - 默认节点
+      - 台湾
+      - 香港
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'https://ani.gamer.com.tw/ajax/getdeviceid.php'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Bahamut.png
+      
+  - name: HBO
+    type: select
+    proxies:
+      - 默认节点
+      - 美国
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 直连
+    url: 'https://www.hbo.com/favicon.ico'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/HBO.png
+      
+  - name: 苹果服务
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'http://www.apple.com/library/test/success.html'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Apple_2.png
+      
+  - name: PayPal
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/PayPal.png
+
+  - name: 谷歌服务
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'http://www.google.com/generate_204'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Google_Search.png
+
+  - name: 微软服务
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'http://www.msftconnecttest.com/connecttest.txt'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Microsoft.png
+
+  - name: Telegram
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    url: 'http://www.telegram.org/img/website_icon.svg'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Telegram.png
+      
+  - name: FCM
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Google.png
+      
+  - name: 国内网站
+    type: select
+    proxies:
+      - 直连
+      - 默认节点
+      - 香港
+      - 台湾
+    url: 'http://www.baidu.com'
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/China.png
+      
+  - name: 国际网站
+    type: select
+    proxies:
+      - 默认节点
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 直连
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Global.png
+
+  - name: 跟踪分析
+    type: select
+    proxies:
+      - REJECT
+      - 直连
+      - 默认节点
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Reject.png
+
+  - name: 广告过滤
+    type: select
+    proxies:
+      - REJECT
+      - 直连
+      - 默认节点
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Advertising.png
+    
+# =======================================================================
+# 规则集配置
+# =======================================================================
+rule-providers:
+  # 规则集：AI相关
+  OpenAI:
+    type: http
+    behavior: domain
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml"
+    path: ./rule_providers/OpenAI.yaml
+    interval: 86400
+
+  Gemini:
+    type: http
+    behavior: domain
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleAI/GoogleAI.yaml"
+    path: ./rule_providers/Gemini.yaml
+    interval: 86400
+    
+  # 规则集：流媒体
+  YouTube:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml"
+    path: ./rule_providers/YouTube.yaml
+    interval: 86400
+
+  Netflix:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Netflix/Netflix.yaml"
+    path: ./rule_providers/Netflix.yaml
+    interval: 86400
+
+  Disney:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Disney/Disney.yaml"
+    path: ./rule_providers/Disney.yaml
+    interval: 86400
+
+  Spotify:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Spotify/Spotify.yaml"
+    path: ./rule_providers/Spotify.yaml
+    interval: 86400
+
+  Bahamut:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Bahamut/Bahamut.yaml"
+    path: ./rule_providers/Bahamut.yaml
+    interval: 86400
+
+  HBO:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/HBO/HBO.yaml"
+    path: ./rule_providers/HBO.yaml
+    interval: 86400
+
+  # 规则集：其他服务
+  Apple:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple.yaml"
+    path: ./rule_providers/Apple.yaml
+    interval: 86400
+
+  Microsoft:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.yaml"
+    path: ./rule_providers/Microsoft.yaml
+    interval: 86400
+
+  Google:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.yaml"
+    path: ./rule_providers/Google.yaml
+    interval: 86400
+
+  PayPal:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PayPal/PayPal.yaml"
+    path: ./rule_providers/PayPal.yaml
+    interval: 86400
+
+  Telegram:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram.yaml"
+    path: ./rule_providers/Telegram.yaml
+    interval: 86400
+
+  # FCM规则集
+  FCM:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleFCM/GoogleFCM.yaml"
+    path: ./rule_providers/FCM.yaml
+    interval: 86400
+
+  # 跟踪与广告
+  Tracker:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/AdvertisingLite/AdvertisingLite.yaml"
+    path: ./rule_providers/Tracker.yaml
+    interval: 86400
+
+  Ads:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/AdvertisingLite/AdvertisingLite.yaml"
+    path: ./rule_providers/Ads.yaml
+    interval: 86400
+
+  # 中国和国际网站
+  ChinaMax:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_Classical.yaml"
+    path: ./rule_providers/ChinaMax.yaml
+    interval: 86400
+
+  # 使用更为精简的Global规则
+  GlobalSites:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global_Classical.yaml"
+    path: ./rule_providers/GlobalSites.yaml
+    interval: 86400
+
+# =======================================================================
+# 规则配置
+# =======================================================================
+rules:
+  # 常用网站直连
+  - DOMAIN,clash.razord.top,DIRECT
+  - DOMAIN,yacd.haishan.me,DIRECT
+  - DOMAIN,yacd.metacubex.one,DIRECT
+  - DOMAIN,clash.metacubex.one,DIRECT
+  - PROCESS-NAME,SunloginClient,DIRECT
+  - PROCESS-NAME,SunloginClient.exe,DIRECT
   
-  const proxyCount = config?.proxies?.length ?? 0;
-  const proxyProviderCount =
-    typeof config?.["proxy-providers"] === "object" ? Object.keys(config["proxy-providers"]).length : 0;
-  if (proxyCount === 0 && proxyProviderCount === 0) {
-    throw new Error("No proxies found in configuration");
-  }
+  # 下载工具直连
+  - PROCESS-NAME,Thunder,DIRECT
+  - PROCESS-NAME,qBittorrent,DIRECT
+  - PROCESS-NAME,Transmission,DIRECT
+  - PROCESS-NAME,aria2c,DIRECT
+  - PROCESS-NAME,BitComet,DIRECT
 
-  config["mixed-port"] = 7890;
-  config["tcp-concurrent"] = true;
-  config["allow-lan"] = true;
-  config["bind-address"] = "*";
-  config["mode"] = "rule";
-  config["ipv6"] = false;
-  config["log-level"] = "info";
-  config["unified-delay"] = true;
-  config["find-process-mode"] = "strict";
-  config["global-client-fingerprint"] = "chrome";
-  config["profile"] = {
-    "store-selected": true,
-    "store-fake-ip": true
-  };
+  # AI服务规则
+  - RULE-SET,OpenAI,AI
+  - RULE-SET,Gemini,AI
+  - DOMAIN-SUFFIX,grazie.ai,AI
+  - DOMAIN-SUFFIX,grazie.aws.intellij.net,AI
   
-  config["dns"] = {
-    "enable": true,
-    "listen": "0.0.0.0:1053",
-    "ipv6": false,
-    "enhanced-mode": "fake-ip",
-    "fake-ip-range": "198.18.0.1/16",
-    "fake-ip-filter": [
-      "*", "+.lan", "+.local", "+.direct", 
-      "+.msftconnecttest.com", "+.msftncsi.com",
-      "+.networkcheck.kde.org", "+.stun.*.*", 
-      "+.stun.*.*.*", "+.stun.*.*.*.*"
-    ],
-    "nameserver": [
-      "https://dns.cloudflare.com/dns-query",
-      "https://doh.opendns.com/dns-query",
-      "https://dns.google/dns-query",
-      "223.5.5.5",
-      "119.29.29.29"
-    ],
-    "fallback": [
-      "https://dns.cloudflare.com/dns-query",
-      "https://doh.opendns.com/dns-query",
-      "https://dns.google/dns-query"
-    ],
-    "fallback-filter": {
-      "geoip": true,
-      "geoip-code": "CN",
-      "ipcidr": [
-        "240.0.0.0/4",
-        "127.0.0.1/8",
-        "0.0.0.0/32"
-      ]
-    }
-  };
-
-  config["geodata-mode"] = true;
-  config["geox-url"] = {
-    "geoip": "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat",
-    "geosite": "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat",
-    "mmdb": "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country.mmdb",
-    "asn": "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/asn.mmdb"
-  };
-
-  config["sniffer"] = {
-    "enable": true,
-    "parse-pure-ip": true,
-    "sniff": {
-      "TLS": {
-        "ports": [443, 8443]
-      },
-      "HTTP": {
-        "ports": [80, 8080, 8880],
-        "override-destination": true
-      },
-      "QUIC": {
-        "ports": [443, 8443]
-      }
-    }
-  };
-
-  config["tun"] = {
-    "enable": true,
-    "stack": "mixed",
-    "dns-hijack": ["any:53"],
-    "auto-route": true,
-    "auto-detect-interface": true
-  };
-
-  config["proxy-groups"] = [
-    {
-      ...groupBaseOption,
-      "name": "手动切换",
-      "type": "select",
-      "proxies": ["🇭🇰 香港", "🇺🇸 美国", "🇸🇬 狮城", "🇯🇵 日本", "🇹🇼 台湾", "DIRECT"],
-      "include-all": true
-    },
-    {
-      ...groupBaseOption,
-      "name": "国外网站",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "国际媒体",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "苹果服务",
-      "type": "select",
-      "proxies": ["DIRECT", ...standardProxies.filter(item => item !== "DIRECT")]
-    },
-    {
-      ...groupBaseOption,
-      "name": "微软服务",
-      "type": "select",
-      "proxies": ["DIRECT", ...standardProxies.filter(item => item !== "DIRECT")]
-    },
-    {
-      ...groupBaseOption,
-      "name": "GitHub",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "谷歌服务",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "YouTube",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "Netflix",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "Disney+",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "PayPal",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "Telegram",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "AI",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "Spotify",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "动画疯",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "Viu",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "HBO",
-      "type": "select",
-      "proxies": standardProxies
-    },
-    {
-      ...groupBaseOption,
-      "name": "兜底分流",
-      "type": "select",
-      "proxies": ["手动切换", "DIRECT", "🇭🇰 香港", "🇺🇸 美国", "🇸🇬 狮城", "🇯🇵 日本", "🇹🇼 台湾"]
-    },
-    {
-      ...groupBaseOption,
-      "name": "🇭🇰 香港",
-      "type": "url-test",
-      "tolerance": 50,
-      "include-all": true,
-      "filter": "(?i)🇭🇰|香港|港|hk|hong|kong",
-      "icon": ""
-    },
-    {
-      ...groupBaseOption,
-      "name": "🇺🇸 美国",
-      "type": "url-test",
-      "tolerance": 100,
-      "include-all": true,
-      "filter": "(?i)🇺🇸|美|美国|us|united states|america",
-      "icon": ""
-    },
-    {
-      ...groupBaseOption,
-      "name": "🇸🇬 狮城",
-      "type": "url-test",
-      "tolerance": 50,
-      "include-all": true,
-      "filter": "(?i)🇸🇬|新加坡|坡|狮城|sg|singapore",
-      "icon": ""
-    },
-    {
-      ...groupBaseOption,
-      "name": "🇯🇵 日本",
-      "type": "url-test",
-      "tolerance": 50,
-      "include-all": true,
-      "filter": "(?i)🇯🇵|日本|jp|japan",
-      "icon": ""
-    },
-    {
-      ...groupBaseOption,
-      "name": "🇹🇼 台湾",
-      "type": "url-test",
-      "tolerance": 50,
-      "include-all": true,
-      "filter": "(?i)🇹🇼|台|台湾|tw|taiwan",
-      "icon": ""
-    }
-  ];
-
-  config["rule-providers"] = {
-    "广告拦截": {
-      ...ruleProviderCommon,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt",
-      "path": "./rules/reject.yaml"
-    },
-    "苹果服务": {
-      ...ruleProviderCommon,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/apple.txt",
-      "path": "./rules/apple.yaml"
-    },
-    "谷歌服务": {
-      ...ruleProviderCommon,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/google.txt",
-      "path": "./rules/google.yaml"
-    },
-    "微软服务": {
-      ...ruleProviderCommon,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/microsoft.txt",
-      "path": "./rules/microsoft.yaml"
-    },
-    "电报服务": {
-      ...ruleProviderCommon,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/telegramcidr.txt",
-      "path": "./rules/telegramcidr.yaml"
-    },
-    "GitHub": {
-      ...ruleProviderCommon,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GitHub/GitHub.yaml",
-      "path": "./rules/github.yaml"
-    },
-    "YouTube": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml",
-      "path": "./rules/youtube.yaml"
-    },
-    "Netflix": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Netflix/Netflix.yaml",
-      "path": "./rules/netflix.yaml"
-    },
-    "Disney": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Disney/Disney.yaml",
-      "path": "./rules/disney.yaml"
-    },
-    "PayPal": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PayPal/PayPal.yaml",
-      "path": "./rules/paypal.yaml"
-    },
-    "Viu": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Viu/Viu.yaml",
-      "path": "./rules/viu.yaml"
-    },
-    "AI": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml",
-      "path": "./rules/ai.yaml"
-    },
-    "动画疯": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Bahamut/Bahamut.yaml",
-      "path": "./rules/bahamut.yaml"
-    },
-    "Spotify": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Spotify/Spotify.yaml",
-      "path": "./rules/spotify.yaml"
-    },
-    "HBO": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/HBO/HBO.yaml",
-      "path": "./rules/hbo.yaml"
-    },
-    "国外网站": {
-      ...ruleProviderCommon,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt",
-      "path": "./rules/proxy.yaml"
-    },
-    "直连网站": {
-      ...ruleProviderCommon,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt",
-      "path": "./rules/direct.yaml"
-    },
-    "私有网络": {
-      ...ruleProviderCommon,
-      "behavior": "domain",
-      "url": "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/private.txt",
-      "path": "./rules/private.yaml"
-    },
-    "局域网": {
-      ...ruleProviderCommon,
-      "behavior": "classical",
-      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Lan/Lan.yaml",
-      "path": "./rules/lan.yaml"
-    }
-  };
-
-  config["rules"] = [
-    "DOMAIN-SUFFIX,local,DIRECT",
-    "IP-CIDR,127.0.0.0/8,DIRECT",
-    "IP-CIDR,172.16.0.0/12,DIRECT",
-    "IP-CIDR,192.168.0.0/16,DIRECT",
-    "IP-CIDR,10.0.0.0/8,DIRECT",
-    "IP-CIDR,17.0.0.0/8,DIRECT",
-    "IP-CIDR,100.64.0.0/10,DIRECT",
-    "IP-CIDR,224.0.0.0/4,DIRECT",
-    
-    "DOMAIN-SUFFIX,generativelanguage.googleapis.com,AI",
-    "DOMAIN-SUFFIX,replicate.com,AI",
-    "DOMAIN-SUFFIX,huggingface.co,AI",
-    "DOMAIN-SUFFIX,cohere.ai,AI",
-    "DOMAIN-SUFFIX,stability.ai,AI",
-    "DOMAIN-SUFFIX,claude.ai,AI",
-    "DOMAIN-SUFFIX,anthropic.com,AI",
-    "DOMAIN-SUFFIX,perplexity.ai,AI",
-    
-    "RULE-SET,广告拦截,REJECT",
-    
-    "RULE-SET,苹果服务,苹果服务",
-    "RULE-SET,谷歌服务,谷歌服务",
-    "RULE-SET,微软服务,微软服务",
-    "RULE-SET,电报服务,Telegram",
-    "RULE-SET,GitHub,GitHub",
-    "RULE-SET,YouTube,YouTube",
-    "RULE-SET,Netflix,Netflix",
-    "RULE-SET,Disney,Disney+",
-    "RULE-SET,PayPal,PayPal",
-    "RULE-SET,Viu,Viu",
-    "RULE-SET,AI,AI",
-    "RULE-SET,动画疯,动画疯",
-    "RULE-SET,Spotify,Spotify",
-    "RULE-SET,HBO,HBO",
-    
-    "RULE-SET,直连网站,DIRECT",
-    "RULE-SET,私有网络,DIRECT",
-    "RULE-SET,局域网,DIRECT",
-    
-    "RULE-SET,国外网站,国外网站",
-    
-    "GEOIP,CN,DIRECT",
-    "MATCH,兜底分流"
-  ];
-
-  return config;
-}
+  # 流媒体规则
+  - RULE-SET,YouTube,YouTube
+  - RULE-SET,Netflix,Netflix
+  - RULE-SET,Disney,Disney+
+  - RULE-SET,Spotify,Spotify
+  - RULE-SET,Bahamut,巴哈姆特
+  
+  # HBO特定规则
+  - DOMAIN-SUFFIX,discomax.com,HBO
+  - DOMAIN-KEYWORD,discomax,HBO
+  - DOMAIN-SUFFIX,hbo.com,HBO
+  - DOMAIN-SUFFIX,hbomax.com,HBO
+  - DOMAIN-SUFFIX,max.com,HBO
+  - DOMAIN-KEYWORD,hbomax,HBO
+  - DOMAIN-KEYWORD,h264.io,HBO
+  - DOMAIN-KEYWORD,litix.io,HBO
+  - RULE-SET,HBO,HBO
+  
+  # 其他服务规则
+  - RULE-SET,Apple,苹果服务
+  - RULE-SET,Google,谷歌服务
+  - RULE-SET,Microsoft,微软服务
+  - RULE-SET,PayPal,PayPal
+  - RULE-SET,Telegram,Telegram
+  - RULE-SET,FCM,FCM
+  
+  # 广告与跟踪规则
+  - RULE-SET,Tracker,跟踪分析
+  - RULE-SET,Ads,广告过滤
+  
+  # 局域网和保留地址直连
+  - GEOIP,private,DIRECT
+  - GEOSITE,private,DIRECT
+  
+  # 中国网站规则 - 使用单一高效的ChinaMax规则集
+  - RULE-SET,ChinaMax,国内网站
+  
+  # 国际网站规则
+  - RULE-SET,GlobalSites,国际网站
+  
+  # 兜底规则
+  - MATCH,模式选择

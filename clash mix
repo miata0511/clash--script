@@ -1,0 +1,655 @@
+#开始编辑配置时，心中牢记缩进和冒号引号，任何不懂，查看官方wiki：https://wiki.metacubex.one
+#修改配置后如果内核不能启动，请查看日志，日志中会告诉你配置第几行写错
+mixed-port: 7890
+mode: rule
+allow-lan: true
+unified-delay: false
+tcp-concurrent: true
+find-process-mode: always
+log-level: info
+ipv6: true
+#关掉后可能在部分手机上出现dns泄露，volte不可用等问题，目前IPv6可以正常使用，不建议关闭
+external-controller: 0.0.0.0:9090
+external-ui: WebUI
+external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
+
+geodata-mode: true
+geox-url:
+  geoip: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
+  geosite: "https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
+  mmdb: "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb"
+  asn: "https://github.com/xishang0128/geoip/releases/download/latest/GeoLite2-ASN.mmdb"
+geo-auto-update: true
+geo-update-interval: 12
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+#嗅探器关掉本机可能出现上网异常，连接本机热点的设备可能无法上网
+sniffer:
+  enable: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports: [80, 443, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 853, 8443]
+    QUIC:
+      ports: [443, 853, 8443]
+  skip-domain:
+    - "+.push.apple.com"
+    - "Mijia Cloud"
+
+#tun必须开启，否则将无法代理流量，如网页打开慢，电报卡连接中，
+#可以尝试更换堆栈，同一堆栈在不同设备上体验不同，自行尝试。
+#更换为非gvisor堆栈可能导致IPv6出现问题
+tun:
+  enable: true
+  stack: gvisor
+  device: Meta
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: false
+  dns-hijack: 
+    - any:53
+    - tcp://any:53
+  exclude-uid:
+  exclude-package:
+    - com.xiaomi.mirror
+    - com.xiaomi.mi_connect_service
+    - com.samsung.android.messaging
+    - com.samsung.android.app.telephonyui
+    - com.samsung.android.dialer
+    - com.samsung.android.incallui
+    - com.samsung.android.smartcallprovider
+    - com.samsung.android.intellivoiceservice
+    - com.android.settings
+    - com.qti.qcc
+    - com.sec.epdg
+    - com.sec.imsservice
+    - com.onepassword.android
+    - com.autonavi.minimap
+    - com.jingdong.app.mall
+    - com.sankuai.meituan
+    - com.taobao.taobao
+    - com.taobao.idlefish
+    - com.eg.android.AlipayGphone
+    - com.bilibili.app.in
+    - com.coolapk.market
+    - com.github.tornaco.android.thanos.pro
+    - com.example.infoxmed_android
+    - com.maimemo.android.momo
+    - com.baidu.netdisk
+    - com.haocheyou.www
+    - com.hush.yamby
+    - com.yikaobang.yixue
+    - com.mvw.nationalmedicalPhone
+    - cn.dxy.medicinehelper
+    - com.netease.mail
+    - com.tencent.mm
+    - com.tencent.mobileqq
+#exclude-package内填写的包名，网络流量不经过tun，相当于黑名单
+#默认添加MIUI镜像服务以及三星电话服务，避免系统功能不可用
+#如果想仅代理指定应用，请将exclude-package改为include-package
+#然后填上想要走代理的包名，不要忘了英文冒号和缩进。
+#目前分流规则已足够完善，白名单可能存在问题，不建议使用
+
+# 安全、稳定、快速的DNS配置
+dns:
+  enable: true
+  ipv6: true
+  listen: 0.0.0.0:53
+  enhanced-mode: redir-host
+  default-nameserver:
+    - 223.5.5.5    # 阿里DNS，国内优先
+    - 119.29.29.29 # 腾讯DNS，国内备用
+  
+  nameserver:
+    - 223.5.5.5    # 阿里DNS，速度快稳定
+    - 119.29.29.29 # 腾讯DNS，备用选择
+  
+  fallback:
+    - 1.1.1.1      # Cloudflare，国际快速DNS
+    - 8.8.8.8      # Google，国际备用DNS
+  
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+
+#------------------------------------------------------------------------------
+proxies:
+proxy-providers:
+  机场1:
+    type: http
+    url: "https://gist.githubusercontent.com/miata0511/9aa5d774143b9ad7b30d3748a8b297e7/raw/11c56aab9cfd18bde0bb49f627562332cddf1341/clash-config.yaml"
+    path: ./proxy_providers/机场1.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场2:
+    type: http
+    url: "https://api-linkcube.org/subscribe/jzpjq-zdp_avdw"
+    path: ./proxy_providers/机场2.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场3:
+    type: http
+    url: "https://links.azurefd.net/api/v1/client/subscribe?token=409b7f296a15f2f437e0e10749867355"
+    path: ./proxy_providers/机场3.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场4:
+    type: http
+    url: "https://sub.homocloud.link/api/subscribe?token=9e8f93ed53cdfa57a7cbfc1fc99ec5b9"
+    path: ./proxy_providers/机场4.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场5:
+    type: http
+    url: "https://2akribis.com/api/v1/client/subscribe?token=cbe3261ce31f5868ce56639965e188ca"
+    path: ./proxy_providers/机场5.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+
+  机场6:
+    type: http
+    url: "https://45.137.181.206/api/v1/client/subscribe?token=dc1cb253f98236f1d31c411802557bfb"
+    path: ./proxy_providers/机场6.yaml
+    interval: 43200
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 43200
+      timeout: 3000
+      lazy: true
+      expected-status: 204
+#------------------------------------------------------------------------------
+proxy-groups:
+  # 模式选择
+  - name: 模式选择
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 机场1
+      - 机场2
+      - 机场3
+      - 机场4
+      - 机场5
+      - 机场6
+      - 全局
+      - 直连
+
+  # 代理模式 - 按规则分流
+  - name: 代理
+    type: select
+    proxies:
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 机场1
+      - 机场2
+      - 机场3
+      - 机场4
+      - 机场5
+      - 机场6
+      
+  # 地区节点分类
+  - name: 香港
+    type: select
+    include-all: true
+    filter: '香港|HK|Hong Kong|HongKong|港'
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+
+  - name: 台湾
+    type: select
+    include-all: true
+    filter: '台湾|TW|Taiwan|台灣|臺灣|台'
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+
+  - name: 新加坡
+    type: select
+    include-all: true
+    filter: '新加坡|狮城|SG|Singapore'
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+    
+  - name: 日本
+    type: select
+    include-all: true
+    filter: '日本|JP|Japan|东京|大阪|日'
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+
+  - name: 美国
+    type: select
+    include-all: true
+    filter: '美国|USA|美國|us|US|United States'
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+      
+  # 各个机场节点
+  - name: 机场1
+    type: select
+    use:
+      - 机场1
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+
+  - name: 机场2
+    type: select
+    use:
+      - 机场2
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+
+  - name: 机场3
+    type: select
+    use:
+      - 机场3
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+
+  - name: 机场4
+    type: select
+    use:
+      - 机场4
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+
+  - name: 机场5
+    type: select
+    use:
+      - 机场5
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+
+  - name: 机场6
+    type: select
+    use:
+      - 机场6
+    url: 'https://www.gstatic.com/generate_204'
+    interval: 43200
+    lazy: true
+    timeout: 3000
+    expected-status: 204
+
+  # 全局模式和直连模式（放在最后）
+  - name: 全局
+    type: select
+    proxies:
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - 机场1
+      - 机场2
+      - 机场3
+      - 机场4
+      - 机场5
+      - 机场6
+      
+  - name: 直连
+    type: select
+    proxies:
+      - DIRECT
+
+  # 分流规则
+  - name: AI
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+      
+  - name: YouTube
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+      
+  - name: Netflix
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+      
+  - name: Disney+
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+      
+  - name: Spotify
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+      
+  - name: 动画疯
+    type: select
+    proxies:
+      - 代理
+      - 台湾
+      - 香港
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+      
+  - name: HBO
+    type: select
+    proxies:
+      - 代理
+      - 美国
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - DIRECT
+      
+  - name: Apple
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+      
+  - name: PayPal
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+
+  # 添加FCM分流组
+  - name: FCM
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+      
+  - name: 中国网站
+    type: select
+    proxies:
+      - DIRECT
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      
+  - name: 国际网站
+    type: select
+    proxies:
+      - 代理
+      - 香港
+      - 台湾
+      - 新加坡
+      - 日本
+      - 美国
+      - DIRECT
+
+#-------------------------------------------------------------------
+# 规则集配置
+rule-providers:
+  # 规则集：AI相关
+  OpenAI:
+    type: http
+    behavior: domain
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml"
+    path: ./rule_providers/OpenAI.yaml
+    interval: 86400
+
+  Gemini:
+    type: http
+    behavior: domain
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleAI/GoogleAI.yaml"
+    path: ./rule_providers/Gemini.yaml
+    interval: 86400
+    
+  # 规则集：流媒体
+  YouTube:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml"
+    path: ./rule_providers/YouTube.yaml
+    interval: 86400
+
+  Netflix:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Netflix/Netflix.yaml"
+    path: ./rule_providers/Netflix.yaml
+    interval: 86400
+
+  Disney:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Disney/Disney.yaml"
+    path: ./rule_providers/Disney.yaml
+    interval: 86400
+
+  Spotify:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Spotify/Spotify.yaml"
+    path: ./rule_providers/Spotify.yaml
+    interval: 86400
+
+  Bahamut:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Bahamut/Bahamut.yaml"
+    path: ./rule_providers/Bahamut.yaml
+    interval: 86400
+
+  HBO:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/HBO/HBO.yaml"
+    path: ./rule_providers/HBO.yaml
+    interval: 86400
+
+  # 规则集：其他服务
+  Apple:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple.yaml"
+    path: ./rule_providers/Apple.yaml
+    interval: 86400
+
+  PayPal:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PayPal/PayPal.yaml"
+    path: ./rule_providers/PayPal.yaml
+    interval: 86400
+
+  # 添加FCM规则集
+  FCM:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleFCM/GoogleFCM.yaml"
+    path: ./rule_providers/FCM.yaml
+    interval: 86400
+
+  # 规则集：中国和国际网站
+  ChinaMax:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/ChinaMax/ChinaMax_Classical.yaml"
+    path: ./rule_providers/ChinaMax.yaml
+    interval: 86400
+
+  GlobalSites:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Global/Global_Classical.yaml"
+    path: ./rule_providers/GlobalSites.yaml
+    interval: 86400
+
+rules:
+  # 常用网站直连
+  - DOMAIN,clash.razord.top,DIRECT
+  - DOMAIN,yacd.haishan.me,DIRECT
+  - DOMAIN,yacd.metacubex.one,DIRECT
+  - DOMAIN,clash.metacubex.one,DIRECT
+  
+  # 下载工具直连
+  - PROCESS-NAME,Thunder,DIRECT
+  - PROCESS-NAME,qBittorrent,DIRECT
+  - PROCESS-NAME,Transmission,DIRECT
+  - PROCESS-NAME,aria2c,DIRECT
+  - PROCESS-NAME,BitComet,DIRECT
+
+  # 根据分流规则分组
+  # HBO专用域名规则（必须放在GlobalSites之前）
+  - DOMAIN-SUFFIX,discomax.com,HBO
+  - DOMAIN-KEYWORD,discomax,HBO
+  - DOMAIN-SUFFIX,hbo.com,HBO
+  - DOMAIN-SUFFIX,hbomax.com,HBO
+  - DOMAIN-SUFFIX,max.com,HBO
+  - DOMAIN-KEYWORD,hbomax,HBO
+  - DOMAIN-KEYWORD,h264.io,HBO
+  - DOMAIN-KEYWORD,litix.io,HBO
+  
+  # 常规规则
+  - RULE-SET,OpenAI,AI
+  - RULE-SET,Gemini,AI
+  - RULE-SET,YouTube,YouTube
+  - RULE-SET,Netflix,Netflix
+  - RULE-SET,Disney,Disney+
+  - RULE-SET,Spotify,Spotify
+  - RULE-SET,Bahamut,动画疯
+  - RULE-SET,HBO,HBO
+  - RULE-SET,Apple,Apple
+  - RULE-SET,PayPal,PayPal
+  - RULE-SET,FCM,FCM
+  - RULE-SET,ChinaMax,中国网站
+  - RULE-SET,GlobalSites,国际网站
+  
+  # 局域网和保留地址
+  - GEOIP,private,DIRECT
+  - GEOSITE,private,DIRECT
+  
+  # 中国地址
+  - GEOIP,CN,中国网站
+  - GEOSITE,CN,中国网站
+  
+  # 兜底规则
+  - MATCH,模式选择

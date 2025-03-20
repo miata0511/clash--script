@@ -119,11 +119,11 @@ proxy-providers:
     type: http
     url: "https://gist.githubusercontent.com/miata0511/9aa5d774143b9ad7b30d3748a8b297e7/raw/11c56aab9cfd18bde0bb49f627562332cddf1341/clash-config.yaml"
     path: ./proxy_providers/机场1.yaml
-    interval: 43200
+    interval: 86400
     health-check:
       enable: true
       url: https://www.gstatic.com/generate_204
-      interval: 43200
+      interval: 7200
       timeout: 3000
       lazy: true
       expected-status: 204
@@ -132,11 +132,11 @@ proxy-providers:
     type: http
     url: "https://api-linkcube.org/subscribe/jzpjq-zdp_avdw"
     path: ./proxy_providers/机场2.yaml
-    interval: 43200
+    interval: 86400
     health-check:
       enable: true
       url: https://www.gstatic.com/generate_204
-      interval: 43200
+      interval: 7200
       timeout: 3000
       lazy: true
       expected-status: 204
@@ -145,11 +145,11 @@ proxy-providers:
     type: http
     url: "https://links.azurefd.net/api/v1/client/subscribe?token=409b7f296a15f2f437e0e10749867355"
     path: ./proxy_providers/机场3.yaml
-    interval: 43200
+    interval: 86400
     health-check:
       enable: true
       url: https://www.gstatic.com/generate_204
-      interval: 43200
+      interval: 7200
       timeout: 3000
       lazy: true
       expected-status: 204
@@ -158,11 +158,11 @@ proxy-providers:
     type: http
     url: "https://sub.homocloud.link/api/subscribe?token=9e8f93ed53cdfa57a7cbfc1fc99ec5b9"
     path: ./proxy_providers/机场4.yaml
-    interval: 43200
+    interval: 86400
     health-check:
       enable: true
       url: https://www.gstatic.com/generate_204
-      interval: 43200
+      interval: 7200
       timeout: 3000
       lazy: true
       expected-status: 204
@@ -171,11 +171,11 @@ proxy-providers:
     type: http
     url: "https://2akribis.com/api/v1/client/subscribe?token=cbe3261ce31f5868ce56639965e188ca"
     path: ./proxy_providers/机场5.yaml
-    interval: 43200
+    interval: 86400
     health-check:
       enable: true
       url: https://www.gstatic.com/generate_204
-      interval: 43200
+      interval: 7200
       timeout: 3000
       lazy: true
       expected-status: 204
@@ -184,11 +184,11 @@ proxy-providers:
     type: http
     url: "https://45.137.181.206/api/v1/client/subscribe?token=dc1cb253f98236f1d31c411802557bfb"
     path: ./proxy_providers/机场6.yaml
-    interval: 43200
+    interval: 86400
     health-check:
       enable: true
       url: https://www.gstatic.com/generate_204
-      interval: 43200
+      interval: 7200
       timeout: 3000
       lazy: true
       expected-status: 204
@@ -197,25 +197,6 @@ proxy-providers:
 # 策略组配置
 # =======================================================================
 proxy-groups:
-  # 模式选择 - 主界面显示的核心选择
-  - name: 模式选择
-    type: select
-    proxies:
-      - 默认节点
-      - 香港
-      - 台湾
-      - 新加坡
-      - 日本
-      - 美国
-      - 机场1
-      - 机场2
-      - 机场3
-      - 机场4
-      - 机场5
-      - 机场6
-      - 直连
-    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Global.png
-
   # 默认节点 - 核心策略组
   - name: 默认节点
     type: select
@@ -568,6 +549,16 @@ proxy-groups:
       - 直连
       - 默认节点
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/Advertising.png
+  
+  # 哔哩哔哩分流
+  - name: 哔哩哔哩
+    type: select
+    proxies:
+      - 直连
+      - 香港
+      - 台湾
+      - 默认节点
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure/IconSet/Color/bilibili.png
     
 # =======================================================================
 # 规则集配置
@@ -629,6 +620,14 @@ rule-providers:
     behavior: classical
     url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/HBO/HBO.yaml"
     path: ./rule_providers/HBO.yaml
+    interval: 86400
+
+  # 哔哩哔哩规则集
+  BiliBili:
+    type: http
+    behavior: classical
+    url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/BiliBili/BiliBili.yaml"
+    path: ./rule_providers/BiliBili.yaml
     interval: 86400
 
   # 规则集：其他服务
@@ -761,6 +760,9 @@ rules:
   - RULE-SET,Tracker,跟踪分析
   - RULE-SET,Ads,广告过滤
   
+  # 哔哩哔哩规则
+  - RULE-SET,BiliBili,哔哩哔哩
+  
   # 局域网和保留地址直连
   - GEOIP,private,DIRECT
   - GEOSITE,private,DIRECT
@@ -772,4 +774,4 @@ rules:
   - RULE-SET,GlobalSites,国际网站
   
   # 兜底规则
-  - MATCH,模式选择
+  - MATCH,默认节点
